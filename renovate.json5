@@ -1,0 +1,94 @@
+// renovate.json5 - Mender dependency update configuration for mender-testkit
+// See Documentation/dependency-updates.md in mender-qa for the process.
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+
+  "extends": [
+    "config:recommended",
+    ":gitSignOff",
+    ":rebaseStalePrs"
+  ],
+
+  // CODEOWNERS drives reviewer assignment - keep its dependency file entries current.
+  "reviewersFromCodeOwners": true,
+
+  // fix(deps): <desc>, per renovate.json5.sample in mender-qa.
+  "semanticCommits": "enabled",
+  "semanticCommitType": "fix",
+  "semanticCommitScope": "deps",
+
+  // Fallback window for weeks with no merges; the renovate CI job is the primary trigger.
+  "schedule": ["after 10pm on Monday", "before 6am on Tuesday"],
+
+  "prHourlyLimit": 2,
+  "prConcurrentLimit": 5,
+
+  // Security PRs bypass the schedule and automerge when CI is green.
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "schedule": ["at any time"],
+    "automerge": true,
+    "automergeType": "pr",
+    "labels": ["security"]
+  },
+
+  "packageRules": [
+    {
+      // The python dependencies here are floors on what this package imports, not
+      // a lockfile: consumers pin exact versions themselves. Raising a floor is a
+      // deliberate act -- it says the code now needs something newer -- so it is
+      // not something to bump automatically.
+      "matchManagers": ["pep621"],
+      "enabled": false
+    },
+    {
+      // The pinned mender-server commit. Everything vendored -- testutils and the
+      // compose files -- is a copy of it, so a bump can change the topology under
+      // every suite that depends on this package. Grouped and labelled so that is
+      // obvious in the PR list.
+      "matchDepNames": ["https://github.com/mendersoftware/mender-server"],
+      "enabled": true,
+      "groupName": "mender-server vendored files",
+      "commitMessageTopic": "mender-server ref"
+    },
+    {
+      // No submodules here; this package vendors its copies instead.
+      "matchManagers": ["git-submodules"],
+      "enabled": false
+    }
+  ],
+
+  "customManagers": [
+    {
+      // A commit on main, not a release tag, because these suites test unreleased
+      // server code: .env pins the backend images to main and the clients are
+      // client-main builds, so compose and testutils must come from there too.
+      // Fixes the suites need also land on main first and reach a tag only at the
+      // next release. Tracking releases instead is workable -- see README for the
+      // three files it touches.
+      "customType": "regex",
+      "managerFilePatterns": ["/^src/mender_testkit/_server_ref\\.py$/"],
+      "matchStrings": [
+        "MENDER_SERVER_REF = \"(?<currentDigest>[0-9a-f]{40})\""
+      ],
+      "depNameTemplate": "https://github.com/mendersoftware/mender-server",
+      "currentValueTemplate": "main",
+      "datasourceTemplate": "git-refs"
+    }
+  ],
+
+  // Renovate only rewrites the ref; the vendored trees still hold the old
+  // commit's files until vendor.py regenerates them. Running it here keeps the PR
+  // internally consistent. Requires the bot's global config to allow the command
+  // (allowedCommands); without that this is a no-op and CI's
+  // `vendor.py --check` fails the PR instead, which is the same outcome by a
+  // slower route.
+  "postUpgradeTasks": {
+    "commands": ["python3 scripts/vendor.py"],
+    "fileFilters": [
+      "src/mender_testkit/testutils/**",
+      "src/mender_testkit/data/mender_server/**"
+    ],
+    "executionMode": "branch"
+  }
+}

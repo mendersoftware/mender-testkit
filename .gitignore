@@ -1,0 +1,9 @@
+# Build artifacts. Clear these before packaging: setuptools reuses build/lib, and a
+# stale copy there once put two versions of the vendored testutils in one wheel.
+build/
+dist/
+*.egg-info/
+
+__pycache__/
+*.py[cod]
+.venv/

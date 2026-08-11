@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mender-testkit"
+version = "0.1.0"
+description = "Shared test infrastructure for the Mender integration test suites"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+
+# What this package's own code imports, at the floors mender-server's
+# backend/tests/requirements-integration.txt was tested against.
+#
+# Not a copy of that file: it is a lockfile listing the whole resolved tree, so
+# copying it here declared 25 transitive packages as direct dependencies and
+# pinned all 37 exactly. Both are wrong for a library -- the exact pins made this
+# uninstallable beside any consumer with its own opinion, and azure-iot-hub-api,
+# which nothing imports, dragged in azure-cli and constrained cryptography for
+# everyone. Consumers keep the exact set in their own lockfiles.
+#
+# 'kubernetes' is deliberately absent: testutils no longer imports it at module
+# scope, so a consumer running against docker compose does not need it. Install
+# the 'kubernetes' extra if you do run against a cluster.
+dependencies = [
+    "aiosmtpd>=1.4.6",
+    "cryptography>=47.0.0",
+    "docker>=7.1.0",
+    "filelock>=3.29.0",
+    "msgpack>=1.2.1",
+    "pymongo>=4.17.0",
+    "pytest>=9.0.3",
+    "redo>=3.0.0",
+    "requests>=2.34.2",
+    "stripe>=15.2.0",
+    "urllib3>=2.7.0",
+    "websockets>=16.0",
+]
+
+[project.optional-dependencies]
+kubernetes = ["kubernetes>=36.0.2"]
+
+[project.entry-points.pytest11]
+mender_testkit = "mender_testkit.plugin"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# The compose tree is data, not code, and its layout matters: docker-compose.yml
+# binds ./compose/certs and ./compose/config relative to the project directory.
+[tool.setuptools.package-data]
+# The explicit .env entry is not redundant: glob patterns do not match dotfiles,
+# so "data/**/*" silently skips it, and compose then falls back to
+# MENDER_IMAGE_TAG=latest instead of the "main" that .env sets.
+mender_testkit = ["data/**/*", "data/mender_server/.env"]

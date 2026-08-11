@@ -1,0 +1,15 @@
+# Stop the backend publishing ports on the host.
+#
+# The tests reach Traefik by container IP, never through localhost, so publishing
+# buys nothing and costs exclusivity: only one stack can hold 443 at a time. That
+# matters because some suites stand up several backends at once -- integration
+# gives every test namespace its own compose project -- and because two suites, or
+# anything else already listening on 80 or 443, otherwise collide.
+#
+# An override rather than deleting the lines with sed: `!reset` stays correct when
+# upstream changes which ports it publishes, whereas a regex silently stops
+# matching. The sed this replaces still stripped 8080 and 9000, which the compose
+# file has not published for some time.
+services:
+  traefik:
+    ports: !reset []
