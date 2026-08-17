@@ -1,0 +1,19 @@
+# Dependency updates
+#
+# renovate.json5 sets reviewersFromCodeOwners, so anything Renovate can edit needs an
+# owner here or its PRs arrive with nobody assigned. The vendored trees under
+# src/mender_testkit/data/ and src/mender_testkit/testutils/ are deliberately absent:
+# Renovate is disabled for them because vendor.py owns their contents, and a fix to
+# either belongs upstream in mender-server.
+
+# The pinned mender-server ref. A bump re-vendors testutils and the compose files, so
+# it can change the topology under every suite depending on this package.
+/src/mender_testkit/_server_ref.py @mendersoftware/qa-dependabot-reviewers
+
+# CI images.
+.gitlab-ci.yml @mendersoftware/qa-dependabot-reviewers
+
+# Dependency floors. Renovate does not bump these today (pep621 is disabled in
+# renovate.json5), but raising a floor by hand is still worth a review: it asserts the
+# code now needs something newer, which consumers have to be able to satisfy.
+pyproject.toml @mendersoftware/qa-dependabot-reviewers

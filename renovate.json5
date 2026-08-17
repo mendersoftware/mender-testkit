@@ -55,6 +55,16 @@
       // No submodules here; this package vendors its copies instead.
       "matchManagers": ["git-submodules"],
       "enabled": false
+    },
+    {
+      // The vendored trees are copies, not sources. They pin third-party images
+      // (traefik, mongo, nats, redis, seaweedfs) that Renovate would otherwise
+      // offer to bump, but vendor.py regenerates these files from the pinned
+      // mender-server ref, so such a PR is clobbered on the next re-vendor and
+      // fails `vendor.py --check` meanwhile. Bump them upstream instead; they
+      // arrive here through _server_ref.py.
+      "matchFileNames": ["src/mender_testkit/data/**"],
+      "enabled": false
     }
   ],
 
