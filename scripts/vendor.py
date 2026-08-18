@@ -92,7 +92,9 @@ def compose_manifest(root: Path) -> list:
             target = root / src.lstrip("./")
             if target.is_dir():
                 seen.extend(
-                    str(p.relative_to(root)) for p in sorted(target.rglob("*")) if p.is_file()
+                    str(p.relative_to(root))
+                    for p in sorted(target.rglob("*"))
+                    if p.is_file()
                 )
             elif target.is_file():
                 seen.append(str(target.relative_to(root)))

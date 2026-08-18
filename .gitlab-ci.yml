@@ -14,6 +14,9 @@ include:
     inputs:
       stage: "renovate"
 
+variables:
+  LICENSE_HEADERS_IGNORE_FILES_REGEXP: '\./src/mender_testkit/testutils/.*'
+
 default:
   tags: !reference [.qa-common-default-runner, tags]
   retry: !reference [.qa-common-default-retry, retry]

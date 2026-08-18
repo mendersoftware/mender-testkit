@@ -54,3 +54,6 @@ where = ["src"]
 # so "data/**/*" silently skips it, and compose then falls back to
 # MENDER_IMAGE_TAG=latest instead of the "main" that .env sets.
 mender_testkit = ["data/**/*", "data/mender_server/.env"]
+
+[tool.black]
+extend-exclude = "^/src/mender_testkit/testutils/"
