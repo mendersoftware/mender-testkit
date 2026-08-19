@@ -49,7 +49,18 @@
       "matchDepNames": ["https://github.com/mendersoftware/mender-server"],
       "enabled": true,
       "groupName": "mender-server vendored files",
-      "commitMessageTopic": "mender-server ref"
+      "commitMessageTopic": "mender-server ref",
+      // git-refs tracks main's tip, so a PR arrives whenever anything lands
+      // upstream, most touching nothing we vendor.
+      // test:vendored-trees already separates the two cases: it passes when the
+      // vendored files did not move and fails when they did, because vendor.py
+      // regenerates them from the new ref. Automerging on a green check therefore
+      // lands the bumps silently and stops on exactly the ones worth
+      // reading. This is also why postUpgradeTasks is left unable to run (see
+      // below): if it regenerated the trees, every PR would go green and
+      // behavioural changes to testutils would merge unreviewed.
+      "automerge": true,
+      "automergeType": "pr"
     },
     {
       // No submodules here; this package vendors its copies instead.
@@ -88,11 +99,19 @@
   ],
 
   // Renovate only rewrites the ref; the vendored trees still hold the old
-  // commit's files until vendor.py regenerates them. Running it here keeps the PR
-  // internally consistent. Requires the bot's global config to allow the command
-  // (allowedCommands); without that this is a no-op and CI's
-  // `vendor.py --check` fails the PR instead, which is the same outcome by a
-  // slower route.
+  // commit's files until vendor.py regenerates them.
+  //
+  // This block is deliberately inert. It documents what regenerating in-PR would
+  // take the bot's global config has to allowlist the command via
+  // allowedCommands, and the mendertesting renovate component sets no
+  // RENOVATE_ALLOWED_COMMANDS but do not enable it. The ref rule above
+  // automerges on a green pipeline, and it is `vendor.py --check` failing that
+  // marks a bump as worth reading. Regenerating the trees here would turn every
+  // PR green and merge testutils behaviour changes unreviewed.
+  //
+  // So when a bump does move the vendored files, CI goes red and someone runs
+  // `python3 scripts/vendor.py` on the PR branch by hand. That is the intended
+  // workflow currently.
   "postUpgradeTasks": {
     "commands": ["python3 scripts/vendor.py"],
     "fileFilters": [
