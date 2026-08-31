@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mender-testkit"
-version = "0.1.0"
+version = "0.1.1"
 description = "Shared test infrastructure for the Mender integration test suites"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -37,6 +37,11 @@ dependencies = [
     "urllib3>=2.7.0",
     "websockets>=16.0",
 ]
+
+# So the PyPI page links back to the source. Without it there is no way to get
+# from a requirements entry to this repo.
+[project.urls]
+Repository = "https://github.com/mendersoftware/mender-testkit"
 
 [project.optional-dependencies]
 kubernetes = ["kubernetes>=36.0.2"]
