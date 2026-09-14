@@ -22,6 +22,7 @@ import logging
 import os
 import subprocess
 import time
+from io import StringIO
 
 from mender_testkit.testutils.infra.device import MenderDevice
 
@@ -159,3 +160,27 @@ def get_device_id(device, server):
         if d["identity_data"]["mac"] == mac_address
     )
     return device_obj["id"]
+
+
+def print_journal(device):
+    """The device's full journal, as a string, for attaching to a failure report.
+
+    Never raises: a device that has gone unreachable is exactly when this is called,
+    so a failure to collect is reported in the returned text rather than replacing
+    the test's own error with an SSH one.
+    """
+    buf = StringIO()
+    try:
+        result = device.run(
+            "journalctl --no-pager --all", hide=True, warn_only=True, wait=60
+        ).strip()
+    except Exception as e:
+        buf.write(f"Could not get journal logs for {device.host_string}: {e}")
+        return buf.getvalue()
+
+    banner = "-" * 42
+    buf.write(f"{banner} Captured journal log for {device.host_string} {banner}")
+    buf.write(result)
+    buf.write(f"{banner} End of captured journal log for {device.host_string} {banner}")
+
+    return buf.getvalue()
