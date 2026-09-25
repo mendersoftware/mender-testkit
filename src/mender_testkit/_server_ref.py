@@ -24,4 +24,4 @@ depend on (MENDER_HOSTNAME in docker-compose.yml) is not in any tag yet -- as of
 this writing v4.1.1 through v4.1.3 have none of it.
 """
 
-MENDER_SERVER_REF = "30871b083f9b3154b560ac8f618cd58dcf8e35d8"
+MENDER_SERVER_REF = "60134a7a52845c002098006652a5df49be81a323"
