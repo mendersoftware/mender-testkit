@@ -188,3 +188,9 @@ python -c "import zipfile,glob; \
   print([n for n in zipfile.ZipFile(sorted(glob.glob('dist/*.whl'))[-1]).namelist() \
          if n.startswith('testutils/')])"     # must be empty
 ```
+
+## Releasing
+
+Publish a GitHub release with a new `v<version>` tag, using "Generate release
+notes" for the changelog. `.github/workflows/pypi-publish.yml` then builds the
+package and uploads it to PyPI. The version comes from the tag.
