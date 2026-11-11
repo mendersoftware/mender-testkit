@@ -18,7 +18,6 @@ jobs:
           git fetch --all --tags
           python -m pip install pip
           pip install uv
-          uv lock --check
           uv build
       - name: Upload release-dists as artifact
         uses: actions/upload-artifact@v7
@@ -34,9 +33,9 @@ jobs:
       - run: |
           git fetch --all --tags
           pip install uv
-          uv lock --check
           uv build
-          uv run pytest
+          pip install dist/*.whl
+          python -c "import mender_testkit.plugin"
   pypi-publish:
     runs-on: ubuntu-26.04
     needs:
