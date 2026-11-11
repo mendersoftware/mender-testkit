@@ -1,0 +1,54 @@
+name: Publish
+# Taken from GH docs:
+on:
+  release:
+    types: [published]
+jobs:
+  release-build:
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.x"
+      - name: Build release distributions
+        run: |
+          git fetch --all --tags
+          python -m pip install pip
+          pip install uv
+          uv lock --check
+          uv build
+      - name: Upload release-dists as artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-dists
+          path: dist/
+  pre-release-tests:
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - run: |
+          git fetch --all --tags
+          pip install uv
+          uv lock --check
+          uv build
+          uv run pytest
+  pypi-publish:
+    runs-on: ubuntu-26.04
+    needs:
+      - release-build
+      - pre-release-tests
+    permissions:
+      id-token: write
+    steps:
+      - name: Retrieve release distributions
+        uses: actions/download-artifact@v8
+        with:
+          name: release-dists
+          path: dist/
+      - name: Publish release distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@v1.14.3
