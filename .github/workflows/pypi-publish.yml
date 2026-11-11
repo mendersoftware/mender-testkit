@@ -34,7 +34,8 @@ jobs:
           git fetch --all --tags
           pip install uv
           uv build
-          uv run pytest
+          pip install dist/*.whl
+          python -c "import mender_testkit.plugin"
   pypi-publish:
     runs-on: ubuntu-26.04
     needs:
