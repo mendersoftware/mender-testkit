@@ -108,6 +108,7 @@ def compose_files(plan: str = "os", publish_ports: bool = False, dest=None) -> l
     paths = [d / "docker-compose.yml"]
     if plan == "enterprise":
         paths.append(d / "compose" / "docker-compose.enterprise.yml")
+        paths.append(d / "overlays" / "no-admin-panel.yml")
     if not publish_ports:
         # Last, so it overrides whatever the files above declared.
         paths.append(d / "overlays" / "no-ports.yml")

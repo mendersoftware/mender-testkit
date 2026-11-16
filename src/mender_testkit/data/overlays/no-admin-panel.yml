@@ -1,0 +1,5 @@
+services:
+  admin-panel:
+    profiles: [admin-panel]
+  admin-panel-gui:
+    profiles: [admin-panel]
